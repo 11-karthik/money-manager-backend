@@ -1,17 +1,16 @@
 package com.moneymanager.backend.service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import com.moneymanager.backend.dto.CategorySummary;
 
+import com.moneymanager.backend.dto.CategorySummary;
 import com.moneymanager.backend.dto.DashboardSummary;
 import com.moneymanager.backend.model.Transaction;
 import com.moneymanager.backend.repository.TransactionRepository;
-import java.time.Duration;
-import java.util.Optional;
+
 @Service
 public class TransactionService {
 
@@ -27,9 +26,9 @@ public class TransactionService {
         return transactionRepository.save(transaction);
     }
 
+    // ✅ FIXED — NO SORT (prevents Mongo crash)
     public List<Transaction> getAllTransactions() {
-        return transactionRepository.findAll(
-                Sort.by(Sort.Direction.DESC, "transactionDate"));
+        return transactionRepository.findAll();
     }
 
     public List<Transaction> getTransactionsBetween(
@@ -37,6 +36,7 @@ public class TransactionService {
             LocalDateTime to) {
         return transactionRepository.findByTransactionDateBetween(from, to);
     }
+
     public List<DashboardSummary> getWeeklyDashboard() {
         return transactionRepository.getWeeklySummary();
     }
@@ -55,16 +55,16 @@ public class TransactionService {
             String division) {
         return transactionRepository.filterTransactions(type, category, division);
     }
+
     public List<CategorySummary> getCategorySummary() {
         return transactionRepository.getCategorySummary();
     }
-    
+
     public Transaction updateTransaction(String id, Transaction updatedData) {
 
         Transaction existing = transactionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Transaction not found"));
 
-        // ⏱️ 12-hour restriction
         Duration duration = Duration.between(
                 existing.getCreatedAt(),
                 LocalDateTime.now()
@@ -74,7 +74,6 @@ public class TransactionService {
             throw new RuntimeException("Editing is allowed only within 12 hours");
         }
 
-        // ✅ Update allowed fields
         existing.setAmount(updatedData.getAmount());
         existing.setType(updatedData.getType());
         existing.setCategory(updatedData.getCategory());
@@ -85,7 +84,7 @@ public class TransactionService {
 
         return transactionRepository.save(existing);
     }
-    
+
     public List<Transaction> getTransactionsByUser(String userId) {
         return transactionRepository.findByUserId(userId);
     }

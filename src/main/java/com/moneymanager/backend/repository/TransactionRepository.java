@@ -15,13 +15,32 @@ public interface TransactionRepository
         extends MongoRepository<Transaction, String> {
 
     // ==========================
-    // DATE RANGE
+    // BASIC QUERIES
     // ==========================
+    List<Transaction> findByUserId(String userId);
+
     List<Transaction> findByTransactionDateBetween(
             LocalDateTime from,
             LocalDateTime to);
-    
-    List<Transaction> findByUserId(String userId);
+
+    void deleteByAmountIsNull();
+
+    // ==========================
+    // FILTER (FIXED ✅)
+    // ==========================
+    @Query("""
+        {
+          $and: [
+            { $or: [ { ?0: { $exists: false } }, { type: ?0 } ] },
+            { $or: [ { ?1: { $exists: false } }, { category: ?1 } ] },
+            { $or: [ { ?2: { $exists: false } }, { division: ?2 } ] }
+          ]
+        }
+    """)
+    List<Transaction> filterTransactions(
+            String type,
+            String category,
+            String division);
 
     // ==========================
     // WEEKLY SUMMARY
@@ -60,22 +79,4 @@ public interface TransactionRepository
         "{ $sort: { category: 1 } }"
     })
     List<CategorySummary> getCategorySummary();
-
-    // ==========================
-    // FILTER
-    // ==========================
-    @Query("{ $and: [ "
-         + " { $or: [ { ?0: null }, { type: ?0 } ] }, "
-         + " { $or: [ { ?1: null }, { category: ?1 } ] }, "
-         + " { $or: [ { ?2: null }, { division: ?2 } ] } "
-         + "] }")
-    List<Transaction> filterTransactions(
-            String type,
-            String category,
-            String division);
-
-    // ==========================
-    // CLEANUP
-    // ==========================
-    void deleteByAmountIsNull();
 }

@@ -23,12 +23,9 @@ public class TransactionController {
         this.transactionService = transactionService;
     }
 
-    // =====================================================
-    // ADD TRANSACTION (USER LINKED)
-    // =====================================================
+    // ADD TRANSACTION
     @PostMapping
-    public Transaction addTransaction(
-            @Valid @RequestBody TransactionRequest request) {
+    public Transaction addTransaction(@Valid @RequestBody TransactionRequest request) {
 
         Transaction transaction = new Transaction();
         transaction.setAmount(request.getAmount());
@@ -42,27 +39,17 @@ public class TransactionController {
         return transactionService.addTransaction(transaction);
     }
 
-    // =====================================================
-    // GET ALL TRANSACTIONS (ADMIN / DEBUG)
-    // =====================================================
+    // ✅ FIXED ENDPOINT (NOW SAFE)
     @GetMapping
     public List<Transaction> getAllTransactions() {
         return transactionService.getAllTransactions();
     }
 
-    // =====================================================
-    // GET TRANSACTIONS BY USER ✅ ONLY ONE METHOD
-    // =====================================================
     @GetMapping("/user/{userId}")
-    public List<Transaction> getTransactionsByUser(
-            @PathVariable String userId) {
-
+    public List<Transaction> getTransactionsByUser(@PathVariable String userId) {
         return transactionService.getTransactionsByUser(userId);
     }
 
-    // =====================================================
-    // DATE RANGE FILTER
-    // =====================================================
     @GetMapping("/range")
     public List<Transaction> getTransactionsBetweenDates(
             @RequestParam LocalDateTime from,
@@ -71,9 +58,6 @@ public class TransactionController {
         return transactionService.getTransactionsBetween(from, to);
     }
 
-    // =====================================================
-    // FILTER BY TYPE / CATEGORY / DIVISION
-    // =====================================================
     @GetMapping("/filter")
     public List<Transaction> filterTransactions(
             @RequestParam(required = false) String type,
@@ -83,9 +67,6 @@ public class TransactionController {
         return transactionService.filterTransactions(type, category, division);
     }
 
-    // =====================================================
-    // DASHBOARDS
-    // =====================================================
     @GetMapping("/dashboard/weekly")
     public List<DashboardSummary> getWeeklyDashboard() {
         return transactionService.getWeeklyDashboard();
@@ -106,9 +87,6 @@ public class TransactionController {
         return transactionService.getCategorySummary();
     }
 
-    // =====================================================
-    // UPDATE TRANSACTION (12-HOUR RULE IN SERVICE)
-    // =====================================================
     @PutMapping("/{id}")
     public Transaction updateTransaction(
             @PathVariable String id,
@@ -126,9 +104,6 @@ public class TransactionController {
         return transactionService.updateTransaction(id, transaction);
     }
 
-    // =====================================================
-    // CLEAN INVALID DATA
-    // =====================================================
     @DeleteMapping("/cleanup")
     public String cleanup() {
         transactionService.cleanInvalidTransactions();
