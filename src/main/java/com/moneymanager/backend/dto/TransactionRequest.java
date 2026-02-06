@@ -2,6 +2,8 @@ package com.moneymanager.backend.dto;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;   // ✅ ADD THIS
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -23,8 +25,9 @@ public class TransactionRequest {
     private String description;
 
     @NotNull(message = "Transaction date is required")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")   // ✅ THIS FIXES 500 ERROR
     private LocalDateTime transactionDate;
-    
+
     private String userId;
 
     // ✅ GETTERS & SETTERS (THIS WAS MISSING)
