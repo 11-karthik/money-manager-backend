@@ -4,12 +4,13 @@ WORKDIR /app
 
 COPY . .
 
-# ✅ Fix permission (THIS WAS MISSING OR NOT APPLIED)
+# Fix Windows line endings + permission
+RUN sed -i 's/\r$//' mvnw
 RUN chmod +x mvnw
 
-# ✅ Build using mvnw
+# Build the app
 RUN ./mvnw clean package -DskipTests
 
 EXPOSE 8080
 
-CMD ["java", "-jar", "target/*.jar"]
+CMD ["sh", "-c", "java -jar target/*.jar"]
