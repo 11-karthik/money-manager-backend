@@ -14,9 +14,6 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    // ==========================
-    // SIGN UP
-    // ==========================
     public User signup(User user) {
 
         if (userRepository.existsByEmail(user.getEmail())) {
@@ -26,18 +23,10 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    // ==========================
-    // SIGN IN
-    // ==========================
     public User login(String email, String password) {
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        if (!user.getPassword().equals(password)) {
-            throw new RuntimeException("Invalid password");
-        }
-
-        return user;
+        return userRepository.findByEmail(email)
+                .filter(user -> user.getPassword().equals(password))
+                .orElse(null);   // <-- THIS IS THE FIX
     }
 }

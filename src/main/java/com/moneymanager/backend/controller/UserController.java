@@ -1,5 +1,7 @@
 package com.moneymanager.backend.controller;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.moneymanager.backend.model.User;
@@ -7,7 +9,7 @@ import com.moneymanager.backend.service.UserService;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin
+@CrossOrigin(origins = "*")
 public class UserController {
 
     private final UserService userService;
@@ -16,19 +18,29 @@ public class UserController {
         this.userService = userService;
     }
 
-    // ==========================
-    // SIGN UP
-    // ==========================
     @PostMapping("/signup")
-    public User signup(@RequestBody User user) {
-        return userService.signup(user);
+    public ResponseEntity<?> signup(@RequestBody User user) {
+        try {
+            return ResponseEntity.ok(userService.signup(user));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
-    // ==========================
-    // SIGN IN
-    // ==========================
     @PostMapping("/login")
-    public User login(@RequestBody User user) {
-        return userService.login(user.getEmail(), user.getPassword());
+    public ResponseEntity<?> login(@RequestBody User user) {
+
+        User loggedInUser = userService.login(
+                user.getEmail(),
+                user.getPassword()
+        );
+
+        if (loggedInUser == null) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body("Invalid email or password");
+        }
+
+        return ResponseEntity.ok(loggedInUser);
     }
 }
